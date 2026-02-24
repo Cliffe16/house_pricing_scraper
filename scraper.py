@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
+from selenium_scraper import sel_scraper
 
 # Define urls from the real estate listings
 urls = ["https://www.buyrentkenya.com/houses-for-rent",
@@ -23,8 +24,8 @@ def scrape(url):
 		listing_id = listing_id['data-bi-listing-id']
 
 		# Property description
-		listing_description = card.select_one("h2.font-semibold")
-		listing_description = listing_description.text.strip() if listing_description else None
+		listing = card.select_one("h2.font-semibold")
+		listing = listing_description.text.strip() if listing_description else None
 
 		# Category
 		listing_category = card.select_one("div.relative[data-bi-listing-category]")
@@ -56,15 +57,18 @@ def scrape(url):
 
 		# Listing link
 		base_url = "https://www.buyrentkenya.com"
-"
+
 		url = card.select_one("a.absolute")
-		url = base_url + url['href']
+		url = base_url + url['href'] if url else None
+
+		# Call the selelnium scraper and store the result
+		sel_staged_data = sel_scraper(url)
 
 		# Confirm all requred fields exist
-		if all([listing_id, listing_description, category, bedroom_count, bathroom_count, offer_type,location, listing_price, agency, url]):
-			listings.append({
+		if all([listing_id, listing, category, bedroom_count, bathroom_count, offer_type,location, listing_price, agency, url]):
+			current_listings = {
 				"listing_id": listing_id,
-				"listing_description": listing_description,
+				"listing": listing,
 				"category": category,
 				"bedroom_count": bedroom_count,
 				"bathroom_count": bathroom_count,
@@ -73,15 +77,17 @@ def scrape(url):
 				"listing_price": listing_price,
 				"agency": agency,
 				"url": url
-				})
+				}
+			current_listings.update(sel_staged_data)
+			listings.append(current_listings)
 
-	return pd.DataFrame(listings)
+	return listings
 
 staged_data = []
 
 for url in urls:
 	scraped_data = scrape(url)
-	staged_data.append(scraped_data)
+	staged_data.append(pd.DataFrame(scraped_data))
 
 data = pd.concat(staged_data, ignore_index=True)
 print(data)
