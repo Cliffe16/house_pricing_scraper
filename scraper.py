@@ -40,7 +40,7 @@ def scrape(url):
 
 		# Offer Type
 		offer_type = soup.select_one("div.search-listing-open-phone-modal[data-bi-listing-offer-type]")
-		offer_type = offer_type['data-bi-listing-offer-type"]
+		offer_type = offer_type['data-bi-listing-offer-type']
 
 		# Location
 		location = soup.select_one("p.w-full")
@@ -57,3 +57,19 @@ def scrape(url):
 		# Listing link
 		url = soup.select_one("a.absolute")
 		url = url['href']
+
+		# Confirm all requred fields exist
+		if all([listing_id, listing_description, category, bedroom_count, bathroom_count, offer_type,location, listing_price, agency, url]):
+			listings.append({
+				"listing_id": listing_id,
+				"listing_description": listing_description,
+				"category": category,
+				"bedroom_count": bedroom_count,
+				"bathroom_count": bathroom_count,
+				"offer_type": offer_type,
+				"location": location,
+				"listing_price": listing_price,
+				"agency": agency,
+				"url": url
+
+	return pd.DataFrame(listings)
