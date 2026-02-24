@@ -3,8 +3,8 @@ from bs4 import BeautifulSoup
 import pandas as pd
 
 # Define urls from the real estate listings
-url = "https://www.buyrentkenya.com/houses-for-rent"
-#url_sale
+urls = ["https://www.buyrentkenya.com/houses-for-rent",
+"https://www.buyrentkenya.com/houses-for-sale"]
 
 def scrape(url):
 	html = requests.get(url).text
@@ -75,5 +75,11 @@ def scrape(url):
 
 	return pd.DataFrame(listings)
 
-data = scrape(url)
+staged_data = []
+
+for url in urls:
+	scraped_data = scrape(url)
+	staged_data.append(scraped_data)
+
+data = pd.concat(staged_data, ignore_index=True)
 print(data)
