@@ -25,7 +25,7 @@ def scrape(url):
 
 		# Property description
 		listing = card.select_one("h2.font-semibold")
-		listing = listing_description.text.strip() if listing_description else None
+		listing = listing.text.strip() if listing else None
 
 		# Category
 		listing_category = card.select_one("div.relative[data-bi-listing-category]")
@@ -83,11 +83,18 @@ def scrape(url):
 
 	return listings
 
+# Fetch data from both urls
 staged_data = []
 
 for url in urls:
 	scraped_data = scrape(url)
 	staged_data.append(pd.DataFrame(scraped_data))
 
+	for page in range(2, 21):
+		page_url = f"{url}?page={page}"
+		page_data = scrape(page_url)
+		staged_data.append(pd.DataFrame(page_data))
+
 data = pd.concat(staged_data, ignore_index=True)
 print(data)
+
