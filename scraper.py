@@ -55,8 +55,10 @@ def scrape(url):
 		agency = agency["data-bi-listing-agent"]
 
 		# Listing link
+		base_url = "https://www.buyrentkenya.com"
+"
 		url = card.select_one("a.absolute")
-		url = url['href']
+		url = base_url + url['href']
 
 		# Confirm all requred fields exist
 		if all([listing_id, listing_description, category, bedroom_count, bathroom_count, offer_type,location, listing_price, agency, url]):
