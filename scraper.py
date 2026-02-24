@@ -2,12 +2,14 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 from selenium_scraper import sel_scraper
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 # Define urls from the real estate listings
 urls = ["https://www.buyrentkenya.com/houses-for-rent",
 "https://www.buyrentkenya.com/houses-for-sale"]
 
-def scrape(url):
+def scraper(driver, url):
 	html = requests.get(url).text
 	soup = BeautifulSoup(html, "html.parser")
 
@@ -62,7 +64,7 @@ def scrape(url):
 		url = base_url + url['href'] if url else None
 
 		# Call the selelnium scraper and store the result
-		sel_staged_data = sel_scraper(url)
+		sel_staged_data = sel_scraper(driver, url)
 
 		# Confirm all requred fields exist
 		if all([listing_id, listing, category, bedroom_count, bathroom_count, offer_type,location, listing_price, agency, url]):
@@ -83,17 +85,32 @@ def scrape(url):
 
 	return listings
 
+# I've moved this setup from the selenium_scraper to improve the speed of
+# the scraping --'the browser is open, scraping is initialized, browser is closed' in one operation
+
+# Set up selenium's browser options
+chrome_options = Options()
+chrome_options.add_argument("--headless") # run chrome without gui
+chrome_options.add_argument("--no-sandbox") # account for incompatible linux environment
+chrome_options.add_argument("--disable-dev-shm-usage") # account for chrome's memory
+
+# Launch the browser
+driver = webdriver.Chrome(options=chrome_options)
+
 # Fetch data from both urls
 staged_data = []
 
 for url in urls:
-	scraped_data = scrape(url)
+	scraped_data = scraper(driver, url)
 	staged_data.append(pd.DataFrame(scraped_data))
 
 	for page in range(2, 21):
 		page_url = f"{url}?page={page}"
-		page_data = scrape(page_url)
+		page_data = scraper(driver, page_url)
 		staged_data.append(pd.DataFrame(page_data))
+
+#Close the browser
+driver.quit()
 
 data = pd.concat(staged_data, ignore_index=True)
 print(data)
