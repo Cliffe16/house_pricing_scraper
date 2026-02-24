@@ -20,7 +20,7 @@ def scrape(url):
 	for card in cards:
 		# Listing id
 		listing_id = card.select_one("div.search-listing-open-phone-modal[data-bi-listing-id]")
-		id = listing_id['data-bi-listing-id']
+		listing_id = listing_id['data-bi-listing-id']
 
 		# Property description
 		listing_description = card.select_one("h2.font-semibold")
