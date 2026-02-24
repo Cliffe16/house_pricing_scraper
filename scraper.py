@@ -4,10 +4,24 @@ import pandas as pd
 from selenium_scraper import sel_scraper
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from sqlalchemy import create_engine
+import os
+from dotenv import load_dotenv
+
+# Load environment variables for database connection
+load_dotenv()
+
+user=os.getenv('DB_USER')
+password=os.getenv('PASSWORD')
+host=os.getenv('DB_HOST')
+database=os.getenv('DATABASE')
 
 # Define urls from the real estate listings
 urls = ["https://www.buyrentkenya.com/houses-for-rent",
 "https://www.buyrentkenya.com/houses-for-sale"]
+
+# Initialize postgres connection string
+engine = create_engine(f"postgresql+psycopg2://{user}:{password}@{host}:5432/{database}")
 
 def scraper(driver, url):
 	html = requests.get(url).text
@@ -113,5 +127,12 @@ for url in urls:
 driver.quit()
 
 data = pd.concat(staged_data, ignore_index=True)
-print(data)
+
+# Upload to database
+with engine.connect() as connection:
+	data.to_sql('raw_data', if_exists='replace', index=False)
+
+#Confirm database upload
+data_read = pd.read_sql_table('raw_data')
+print(data_read)
 
