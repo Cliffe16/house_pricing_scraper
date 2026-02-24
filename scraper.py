@@ -56,4 +56,4 @@ def scrape(url):
 
 		# Listing link
 		url = soup.select_one("a.absolute")
-		url = url.text.strip() if url else None
+		url = url['href']
