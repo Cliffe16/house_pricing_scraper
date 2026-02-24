@@ -19,43 +19,43 @@ def scrape(url):
 	# Iterate through the listing cards
 	for card in cards:
 		# Listing id
-		listing_id = soup.select_one("div.search-listing-open-phone-modal[data-bi-listing-id]")
+		listing_id = card.select_one("div.search-listing-open-phone-modal[data-bi-listing-id]")
 		id = listing_id['data-bi-listing-id']
 
 		# Property description
-		listing_description = soup.select_one("h2.font-semibold")
+		listing_description = card.select_one("h2.font-semibold")
 		listing_description = listing_description.text.strip() if listing_description else None
 
 		# Category
-		listing_category = soup.select_one("div.relative[data-bi-listing-category]")
+		listing_category = card.select_one("div.relative[data-bi-listing-category]")
 		category = listing_category['data-bi-listing-category']
 
 		# Number of bedrooms
-		bedroom_count = soup.select_one("span.whitespace-nowrap[data-cy='card-bedroom_count']")
+		bedroom_count = card.select_one("span.whitespace-nowrap[data-cy='card-bedroom_count']")
 		bedroom_count = bedroom_count.text.strip() if bedroom_count else None
 
 		# Number of bathrooms
-		bathroom_count = soup.select_one("span.whitespace-nowrap[data-cy='card-bathroom_count']")
+		bathroom_count = card.select_one("span.whitespace-nowrap[data-cy='card-bathroom_count']")
 		bathroom_count = bathroom_count.text.strip() if bathroom_count else None
 
 		# Offer Type
-		offer_type = soup.select_one("div.search-listing-open-phone-modal[data-bi-listing-offer-type]")
+		offer_type = card.select_one("div.search-listing-open-phone-modal[data-bi-listing-offer-type]")
 		offer_type = offer_type['data-bi-listing-offer-type']
 
 		# Location
-		location = soup.select_one("p.w-full")
+		location = card.select_one("p.w-full")
 		location = location.text.strip() if location else None
 
 		# Listing Price
-		listing_price = soup.select_one("div.relative[data-bi-listing-price]")
+		listing_price = card.select_one("div.relative[data-bi-listing-price]")
 		listing_price = listing_price['data-bi-listing-price']
 
 		# Agency
-		agency = soup.select_one("div.search-listing-open-phone-modal[data-bi-listing-agent]")
+		agency = card.select_one("div.search-listing-open-phone-modal[data-bi-listing-agent]")
 		agency = agency["data-bi-listing-agent"]
 
 		# Listing link
-		url = soup.select_one("a.absolute")
+		url = card.select_one("a.absolute")
 		url = url['href']
 
 		# Confirm all requred fields exist
