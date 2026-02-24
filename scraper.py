@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import pandas as pd
 
 # Define urls from the real estate listings
-url_rent = "https://www.buyrentkenya.com/houses-for-rent"
+url = "https://www.buyrentkenya.com/houses-for-rent"
 #url_sale
 
 def scrape(url):
@@ -14,7 +14,7 @@ def scrape(url):
 	listings = []
 
 	# Select listing cards
-	cards = soup.select("listing-card")
+	cards = soup.select("div.listing-card")
 
 	# Iterate through the listing cards
 	for card in cards:
@@ -71,5 +71,9 @@ def scrape(url):
 				"listing_price": listing_price,
 				"agency": agency,
 				"url": url
+				})
 
 	return pd.DataFrame(listings)
+
+data = scrape(url)
+print(data)
