@@ -3,31 +3,36 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import TimeoutException
 
 def sel_scraper(driver, url):
 	# Navigate to the url
 	driver.get(url)
 
 	# 1. Phone number
-	# Save the contact button in a variable
-	contact_buttons = driver.find_elements(By.CSS_SELECTOR, "button.detail-listing-open-phone-modal")
+	try:
+		# Save the contact button in a variable
+		contact_buttons = driver.find_elements(By.CSS_SELECTOR, "button.detail-listing-open-phone-modal")
 
-	# Iterate through the buttons and find the ones displayed to click 
-	for contact_button in contact_buttons:
-		if contact_button.is_displayed():
-			driver.execute_script("arguments[0].click()", contact_button)
-			break
+		# Iterate through the buttons and find the ones displayed to click 
+		for contact_button in contact_buttons:
+			if contact_button.is_displayed():
+				driver.execute_script("arguments[0].click()", contact_button)
+				break
 
-	# Wait for the number to render
-	phone_number = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CSS_SELECTOR, "span.block")))
-	phone_number = phone_number.text
+		# Wait for the number to render
+		phone_number = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "span.block.text-xl")))
+		phone_number = phone_number.text
+
+	except TimeoutException:
+		print(f"Could not find phone_number")
 
 	# 2. Property description
 	listing_description = driver.find_element(By.ID, "truncatedDescription")
 	listing_description = listing_description.text
 
 	# 3. Date of listing
-	created_at = driver.find_element(By.CSS_SELECTOR, "span.text-sm")
+	created_at = driver.find_element(By.XPATH, "//span[contains(text(), 'Created At')]")
 	created_at = created_at.text
 
 	# Store the data in a dictionary

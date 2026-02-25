@@ -17,11 +17,10 @@ host=os.getenv('DB_HOST')
 database=os.getenv('DATABASE')
 
 # Define urls from the real estate listings
-urls = ["https://www.buyrentkenya.com/houses-for-rent",
-"https://www.buyrentkenya.com/houses-for-sale"]
+urls = os.getenv('URLS').split(",")
 
 # Initialize postgres connection string
-engine = create_engine(f"postgresql+psycopg2://{user}:{password}@{host}:5432/{database}")
+engine = f"postgresql+psycopg2://{user}:{password}@{host}:5432/{database}"
 
 def scraper(driver, url):
 	html = requests.get(url).text
@@ -72,7 +71,7 @@ def scraper(driver, url):
 		agency = agency["data-bi-listing-agent"]
 
 		# Listing link
-		base_url = "https://www.buyrentkenya.com"
+		base_url = os.getenv('BASE_URL')
 
 		url = card.select_one("a.absolute")
 		url = base_url + url['href'] if url else None
@@ -129,10 +128,9 @@ driver.quit()
 data = pd.concat(staged_data, ignore_index=True)
 
 # Upload to database
-with engine.connect() as connection:
-	data.to_sql('raw_data', if_exists='replace', index=False)
+data.to_sql('raw_data', con=engine, if_exists='replace', index=False)
 
 #Confirm database upload
-data_read = pd.read_sql_table('raw_data')
-print(data_read)
+data_read = pd.read_sql_table('raw_data', con=engine)
+print(data_read.info())
 
