@@ -25,7 +25,8 @@ def sel_scraper(driver, url):
 		phone_number = phone_number.text
 
 	except TimeoutException:
-		print(f"Could not find phone_number")
+		print(f"Could not find phone_number for {url}")
+		phone_number = None
 
 	# 2. Property description
 	listing_description = driver.find_element(By.ID, "truncatedDescription")
