@@ -17,7 +17,7 @@ def sel_scraper(driver, url):
 		# Iterate through the buttons and find the ones displayed to click 
 		for contact_button in contact_buttons:
 			if contact_button.is_displayed():
-				driver.execute_script("arguments[0].click()", contact_button)
+				driver.execute_script("arguments[0].click()", contact_button) # Use JS clicks, to bypass .click() element interception error
 				break
 
 		# Wait for the number to render
@@ -33,8 +33,8 @@ def sel_scraper(driver, url):
 	listing_description = listing_description.text
 
 	# 3. Date of listing
-	created_at = driver.find_element(By.XPATH, "//span[contains(text(), 'Created At')]")
-	created_at = created_at.text
+	created_at = driver.find_element(By.XPATH, "//span[contains(text(), 'Created At')]") # conuld not find elelment with css selector
+	created_at = created_at.text.replace("Created at:", "")
 
 	# Store the data in a dictionary
 	sel_data = {

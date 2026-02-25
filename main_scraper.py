@@ -99,7 +99,7 @@ def scraper(driver, url):
 	return listings
 
 # I've moved this setup from the selenium_scraper to improve the speed of
-# the scraping --'the browser is open, scraping is initialized, browser is closed' in one operation
+# browser connection
 
 # Set up selenium's browser options
 chrome_options = Options()
