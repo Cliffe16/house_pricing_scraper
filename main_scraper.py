@@ -16,9 +16,6 @@ password=os.getenv('PASSWORD')
 host=os.getenv('DB_HOST')
 database=os.getenv('DATABASE')
 
-# Define urls from the real estate listings
-urls = os.getenv('URLS').split(",")
-
 # Initialize postgres connection string
 engine = f"postgresql+psycopg2://{user}:{password}@{host}:5432/{database}"
 
@@ -98,39 +95,51 @@ def scraper(driver, url):
 
 	return listings
 
-# I've moved this setup from the selenium_scraper to improve the speed of
+# I've moved this setup to this function from the selenium_scraper to improve the speed of
 # browser connection
 
-# Set up selenium's browser options
-chrome_options = Options()
-chrome_options.add_argument("--headless") # run chrome without gui
-chrome_options.add_argument("--no-sandbox") # account for incompatible linux environment
-chrome_options.add_argument("--disable-dev-shm-usage") # account for chrome's memory
+def run_pipeline():
+	# Set up selenium's browser options
+	chrome_options = Options()
+	chrome_options.add_argument("--headless") # run chrome without gui
+	chrome_options.add_argument("--no-sandbox") # account for incompatible linux environment
+	chrome_options.add_argument("--disable-dev-shm-usage") # account for chrome's memory
+	# airflow optimizations
+	chrome_options.add_argument("--disable-gpu") # prevents headless chrome from crashing
+	chrome_options.add_argument(" --window-size=1920,1080") # define size to avoid unpredictable rendering
 
-# Launch the browser
-driver = webdriver.Chrome(options=chrome_options)
+	# Launch the browser
+	driver = webdriver.Chrome(options=chrome_options)
 
-# Fetch data from both urls
-staged_data = []
+	# Fetch data from both urls
+	try:
+		staged_data = []
 
-for url in urls:
-	scraped_data = scraper(driver, url)
-	staged_data.append(pd.DataFrame(scraped_data))
+		# Define urls from the real estate listings
+		urls = os.getenv('URLS').split(",")
 
-	for page in range(2, 21):
-		page_url = f"{url}?page={page}"
-		page_data = scraper(driver, page_url)
-		staged_data.append(pd.DataFrame(page_data))
+		for url in urls:
+			scraped_data = scraper(driver, url)
+			staged_data.append(pd.DataFrame(scraped_data))
 
-#Close the browser
-driver.quit()
+			for page in range(2, 21):
+				page_url = f"{url}?page={page}"
+				page_data = scraper(driver, page_url)
+				staged_data.append(pd.DataFrame(page_data))
 
-data = pd.concat(staged_data, ignore_index=True)
+		# Combine the data
+		data = pd.concat(staged_data, ignore_index=True)
 
-# Upload to database
-data.to_sql('raw_data', con=engine, if_exists='replace', index=False)
+		# Upload to database
+		data.to_sql('raw_data', con=engine, if_exists='replace', index=False)
 
-#Confirm database upload
-data_read = pd.read_sql_table('raw_data', con=engine)
-print(data_read.info())
+		#Confirm database upload
+		data_read = pd.read_sql_table('raw_data', con=engine)
+		print(data_read.info())
 
+	finally:
+		# Close the browser
+		driver.quit()
+
+if __name__ == "__main__":
+	run_pipeline()
