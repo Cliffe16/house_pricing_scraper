@@ -25,9 +25,9 @@ The project is designed to run in a background environment:
 1. **Airflow trigger:** The `housing_scraper` DAG is triggered daily at midnight
 2. **Project paths:** At runtime, the DAG injects the project's virtual environment and directory path into the system's `sys.path`. This allows the Airflow scheduler service to access the project's packages and python functions without altering system-wide Python configurations for this particular project.
 3. **Orchestration Function:** Airflow calls `run_pipeline()`, which initializes a headless Chrome browser to avoid system crashes.
-4. **Hybrid Scraper:** The script iterates through the `for-sale` and `for-rent` URLs and their respective pages(range(1,21))
+4. **Hybrid Scraper:** The script iterates through the 'for-sale' and 'for-rent' URLs and their respective pages(`range(1,21)`)
 	* **Requests/BeautifulSoup4:** parses static HTML content(prices, no_bedrooms, no_bathrooms etc.)
-	* **Selenium:** parses agency phone_numbers hidden behind a contact button and date_of_listing both behind the listing's link
+	* **Selenium:** parses agency `phone_numbers` hidden behind a contact button and `date_of_listing` both behind the `listing's link`
 5. **Data Consolidation & Upload:** The scraped dictionary is converted into a Pandas DataFrame. Using an SQLAlchemy engine, the data is pushed to a PostgreSQL database using `if_exists='replace` to refresh the `raw_data` table daily.
 
 
