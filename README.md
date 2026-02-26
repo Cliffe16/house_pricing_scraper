@@ -1,6 +1,6 @@
 # Real Estate Housing Scraper
 
-This is a mini project from Lux Dev HQ meant to solidify web scraping and orchestration. The project contains a robust data pipeline that scrapes real estate listings from BuyRent Kenya using a hybrid approach: **Requests/BeautifulSoup** for static content and *Selenium* for dynamic elements with *Airflow* as the orchestrator.
+This is a mini project from Lux Dev HQ meant to solidify web scraping and orchestration. The project contains a robust data pipeline that scrapes real estate listings from BuyRent Kenya using a hybrid approach: **Requests/BeautifulSoup** for static content and **Selenium** for dynamic elements with **Airflow** as the orchestrator.
 
 ## Tools
 * **Orchestration:** Apache Airflow 2.10.0
