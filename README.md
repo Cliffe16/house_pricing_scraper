@@ -18,6 +18,7 @@ house_pricing_scraper/
 ├── selenium_scraper.py          # Chrome driver interactions
 ├── requirements.txt             # Project dependencies
 └── .env                         # Database & URL credentials
+```
 
 ## How the pipeline works
 The project is designed to run in a background environment:
@@ -31,12 +32,13 @@ The project is designed to run in a background environment:
 
 
 ## Setup & Installation
+```text
 git clone <your-repo-url>
 cd house_pricing_scraper
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-
+```
 ## Challenges
 Building the pipeline required solving some orchestration and environmental issues:
 ### 1. Airflow Parsing Timeouts 
