@@ -4,7 +4,8 @@ import pandas as pd
 from selenium_scraper import sel_scraper
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from sqlalchemy import create_engine
+import psycopg2
+import psycopg2.extras
 import os
 from dotenv import load_dotenv
 
@@ -16,8 +17,6 @@ password=os.getenv('PASSWORD')
 host=os.getenv('DB_HOST')
 database=os.getenv('DATABASE')
 
-# Initialize postgres connection string
-engine = f"postgresql+psycopg2://{user}:{password}@{host}:5432/{database}"
 
 def scraper(driver, url):
 	html = requests.get(url).text
@@ -99,6 +98,17 @@ def scraper(driver, url):
 # browser connection
 
 def run_pipeline():
+
+# Initialize postgres connection string
+	conn = psycopg2.connect(
+		host=host,
+		database=database,
+		user=user,
+		password=password,
+		port="5432"
+		)
+	cur = conn.cursor()
+
 	# Set up selenium's browser options
 	chrome_options = Options()
 	chrome_options.add_argument("--headless") # run chrome without gui
@@ -130,16 +140,35 @@ def run_pipeline():
 		# Combine the data
 		data = pd.concat(staged_data, ignore_index=True)
 
+		# Transform the data for database upload
+		data = data.astype(object).where(pd.notna(data), None)
+		columns = ",".join([f'"{col}" TEXT' for col in data.columns])
+
 		# Upload to database
-		data.to_sql('raw_data', con=engine, if_exists='replace', index=False)
+		cur.execute("DROP TABLE IF EXISTS raw_data;") # Remove existing data
+		cur.execute(f"CREATE TABLE raw_data ({columns});")
 
-		#Confirm database upload
-		data_read = pd.read_sql_table('raw_data', con=engine)
-		print(data_read.info())
+		# Create a string of placeholders
+		placeholders = ", ".join(["%s"] * len(data.columns))
+		insert = f"INSERT INTO raw_data VALUES ({placeholders})" 
 
+    		# Convert the entire dataframe into a list of tuples for the database
+		data_tuples = [tuple(row) for row in data.to_numpy()]
+
+    		# Execute the insert query
+		cur.executemany(insert, data_tuples)
+
+		# Confirm database upload
+		data_read = pd.read_sql("SELECT * FROM raw_data LIMIT 10;", con=conn)
+		print(data_read)
+
+		# Commit changes to database if all the data exists
+		conn.commit()
 	finally:
 		# Close the browser
 		driver.quit()
+		cur.close()
+		conn.close()
 
 if __name__ == "__main__":
 	run_pipeline()

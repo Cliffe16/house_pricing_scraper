@@ -25,8 +25,8 @@ with DAG(
 	default_args={
 		"depends_on_past": False,
 		"email_on_failure": False,
-		"retries": 1,
-		"retry_delay": timedelta(minutes=5)
+		"retries": 3,
+		"retry_delay": timedelta(minutes=10)
 		},
 	description="BuyRentKenya real estate scraper",
 	schedule="@daily",

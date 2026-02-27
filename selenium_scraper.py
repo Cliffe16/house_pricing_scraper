@@ -33,8 +33,9 @@ def sel_scraper(driver, url):
 	listing_description = listing_description.text
 
 	# 3. Date of listing
-	created_at = driver.find_element(By.XPATH, "//span[contains(text(), 'Created At')]") # conuld not find elelment with css selector
-	created_at = created_at.text.replace("Created at:", "")
+	created_at_element = WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.XPATH, "//span[contains(., 'Created At')]"))) # conuld not find elelment with css selector
+	created_at = created_at_element.get_attribute("textContent")
+	created_at = created_at.replace("Created At:", "").strip()
 
 	# Store the data in a dictionary
 	sel_data = {
