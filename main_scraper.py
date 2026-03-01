@@ -99,7 +99,7 @@ def scraper(driver, url):
 
 def run_pipeline():
 
-# Initialize postgres connection string
+	# Initialize postgres connection string
 	conn = psycopg2.connect(
 		host=host,
 		database=database,
