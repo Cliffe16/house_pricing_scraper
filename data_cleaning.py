@@ -9,11 +9,11 @@ load_dotenv()
 def clean_data():
 	# Connect to db
 	conn = psycopg2.connect(
-		host=os.getenv('HOST'),
+		host=os.getenv('DB_HOST'),
 		database=os.getenv('DATABASE'),
-		user=os.getenv('USER'),
+		user=os.getenv('DB_USER'),
 		password=os.getenv('PASSWORD'),
-		port=5432
+		port="5432"
 		)
 	cur = conn.cursor()
 

@@ -16,6 +16,7 @@ sys.path.append(os.path.join(project_root, 'venv/lib/python3.12/site-packages'))
 
 from dotenv import load_dotenv
 from main_scraper import run_pipeline
+from data_cleaning import clean_data
 
 # Load the .env file using the dynamic root path
 load_dotenv(os.path.join(project_root, '.env'))
@@ -35,11 +36,15 @@ with DAG(
 
 ) as dag:
 	housing_scraper = PythonOperator(
-	task_id='house_scraper',
-	python_callable=run_pipeline
+		task_id='house_scraper',
+		python_callable=run_pipeline
+	)
+	data_cleaner = PythonOperator(
+		task_id='cleaning_task',
+		python_callable=clean_data
 	)
 
-
+housing_scraper >> data_cleaner
 
 
 
