@@ -28,7 +28,8 @@ The project is designed to run in a background environment:
 4. **Hybrid Scraper:** The script iterates through the 'for-sale' and 'for-rent' URLs and their respective pages(`range(1,21)`)
 	* **Requests/BeautifulSoup4:** parses static HTML content(prices, no_bedrooms, no_bathrooms etc.)
 	* **Selenium:** parses agency `phone_numbers` hidden behind a contact button and `date_of_listing` both behind the `listing's link`
-5. **Data Consolidation & Upload:** The scraped dictionary is converted into a Pandas DataFrame. Using an SQLAlchemy engine, the data is pushed to a PostgreSQL database using `if_exists='replace` to refresh the `raw_data` table daily.
+5. **Data Consolidation & Upload:** The scraped dictionary is converted into a Pandas DataFrame. Using an SQLAlchemy engine, the data is pushed to a PostgreSQL database using `DROP TABLE IF EXISTS` to refresh the `raw_data` table daily.
+6. **Cleaning: ** The data from raw_data is cleaned and transformed using pandas then loaded into a new table `cleaned_data` using the database cursor connection
 
 
 ## Setup & Installation
