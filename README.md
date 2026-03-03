@@ -29,7 +29,7 @@ The project is designed to run in a background environment:
 	* **Requests/BeautifulSoup4:** parses static HTML content(prices, no_bedrooms, no_bathrooms etc.)
 	* **Selenium:** parses agency `phone_numbers` hidden behind a contact button and `date_of_listing` both behind the `listing's link`
 5. **Data Consolidation & Upload:** The scraped dictionary is converted into a Pandas DataFrame. Using an SQLAlchemy engine, the data is pushed to a PostgreSQL database using `DROP TABLE IF EXISTS` to refresh the `raw_data` table daily.
-6. **Cleaning: ** The data from raw_data is cleaned and transformed using pandas then loaded into a new table `cleaned_data` using the database cursor connection
+6. **Cleaning: ** The data from raw_data is cleaned and transformed using pandas then loaded into a new table `cleaned_data` with the required data types using the database cursor connection
 
 
 ## Setup & Installation
@@ -50,15 +50,20 @@ Building the pipeline required solving some orchestration and environmental issu
 * **Challenge:** Selenium ran perfectly in the foreground terminal but threw `urllib3.exceptions.ReadTimeoutError` when executed by Airflow's background worker due to memory limits and hardware acceleration conflicts.
 * **Solution:** Added `--no-sandbox`, `--disable-dev-shm-usage`, `--disable-gpu`, to the ChromeDriver configuration for Linux background processes and forced a standard `--window-size=1920,1080` to prevent unpredictable rendering hangs.
 
-### 3. Dependency Hell 
+### 3. Headless Chrome memory saving bug
+* **Challenge:** When Chrome runs in --headless mode, it tries to save memory by only rendering what is immediately visible on the screen. Since the "Created At" date is further down the page, Chrome does not find it thus returning an empty string.
+* **Solution:** Added `WebDriverWait()` to wait for the element to be visible, then replaced `driver.find_element()` with `created_at_element.get_attribute("textContent")` to ask the browser for the raw HTML text
+
+### 4. Dependency Incompatibilities
 * **Challenge:** Installing the `apache-airflow-providers-postgres` plugin fractured the virtual environment as `pip` introduced newer, incompatible versions of `pydantic` and `typing_extensions`. This broke Airflow's internal database migrations with a missing `mysql_drop_foreignkey_if_exists` error.
 * **Solution:** Executed a clean wipe of the `venv` and rebuilt it using a **strict constraints file** (`constraints-2.10.0/constraints-3.12.txt`). This forced all third-party libraries to align with Airflow's expected dependencies.	
 
-### 4. Systemd vs. Local Virtual Environment Paths
+### 5. Systemd vs. Local Virtual Environment Paths
 * **Challenge:** The Airflow Scheduler runs as a Linux `systemd` service, meaning it defaulted to the global system Python. It threw `ModuleNotFoundError` for Selenium because it was blind to the project's virtual environment.
 * **Solution:** Instead of hardcoding paths into the Linux systemd service (which is hard to maintain), I implemented dynamic path injection (`sys.path.append`) directly at the top of the DAG file.
 
-### 5. Version Control Integration
+### 6. Version Control Integration
 * **Challenge:** Airflow expects DAGs to live in its global `~/airflow/dags` directory, but the DAG needed to be tracked in the local project's Git repository.
 * **Solution:** Kept the master DAG file inside the Git-tracked project directory and created a **symbolic link** (`ln -s`) in the Airflow folder. This allows Git to track changes while Airflow reads the live, updated file seamlessly.
+
 
